@@ -21,11 +21,10 @@ RAG Vector는 사내 문서를 안전하게 관리하고 AI 기반 질의응답�
 
 ## 스크린샷 (Screenshots)
 
-| **Admin Dashboard (문서 관리)** | **Chat Interface (질의응답)** |
-|:---------------------------:|:--------------------------:|
-| <img src="assets/admin_ui_placeholder.png" alt="Admin UI" width="400"> | <img src="assets/chat_ui_placeholder.png" alt="Chat UI" width="400"> |
-| *문서 업로드 및 처리 현황 모니터링* | *문서 기반의 정확한 답변 및 출처 제공* |
-> *스크린샷은 예시입니다. 실제 구동 화면을 `assets/` 폴더에 캡처하여 넣어주세요.*
+|                 **Admin Dashboard (문서 관리)**                 |                 **Chat Interface (질의응답)**                  |
+|:-----------------------------------------------------------:|:----------------------------------------------------------:|
+| <img src="./assets/rag_admin.png" alt="Admin UI" width="400"> | <img src="./assets/rag_webui.png" alt="Chat UI" width="400"> |
+|                    *문서 업로드 및 처리 현황 모니터링*                    |                  *문서 기반의 정확한 답변 및 출처 제공*                   |
 
 ### 주요 특징
 

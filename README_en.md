@@ -23,9 +23,8 @@ Enterprise RAG Core is an enterprise-grade system designed to securely manage in
 
 | **Admin Dashboard (Document Management)** | **Chat Interface (Q&A)** |
 |:---------------------------:|:--------------------------:|
-| <img src="assets/admin_ui_placeholder.png" alt="Admin UI" width="400"> | <img src="assets/chat_ui_placeholder.png" alt="Chat UI" width="400"> |
+| <img src="./assets/rag_admin.png" alt="Admin UI" width="400"> | <img src="./assets/rag_webui.png" alt="Chat UI" width="400"> |
 | *Document Upload & Processing Monitoring* | *Accurate Answers with Citations* |
-> *Screenshots are examples. Please replace with actual screenshots in the `assets/` folder.*
 
 ### Key Features
 
