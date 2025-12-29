@@ -30,11 +30,12 @@ Enterprise RAG Core is an enterprise-grade system designed to securely manage in
 
 - **🔍 Next-Gen Hybrid Search Engine**
   - **Vector Search**: Semantic search using pgvector HNSW.
-  - **Keyword Search**: Partial match search optimized for Korean (ILIKE Pattern Matching).
+  - **Keyword Search**: Optimized Korean partial match using **Kiwi Morphological Analyzer** (Noun Extraction & OR-Condition).
   - **RRF (Reciprocal Rank Fusion)**: Ensemble of both search results for optimal ranking.
   - **Enhanced Recall**: Expands candidates by 10x (`limit = top_k * 10`) to minimize search misses.
 
 - **⚡️ Enterprise-Grade Performance & Architecture**
+  - **High-Performance Ingestion**: Ultra-fast embedding generation via **Async Batch Processing** (eliminating I/O blocking).
   - **Async Processing**: Celery + Redis based non-blocking document processing.
   - **Security**: JWT Authentication and RBAC.
   - **Scalability**: Modular monolith structure for easy feature expansion.
@@ -137,7 +138,7 @@ User Query
 [Step 2] Wide Retrieval
     - Retrieve top k*10 candidates (e.g., 40~80)
     - Millisecond-level search with HNSW Index
-    - Keyword inclusion with ILIKE pattern matching
+    - **Kiwi Analysis**: Extract nouns from query for precise OR-condition matching
     ↓
 [Step 3] Hybrid Reranking (RRF & Reranking)
     - Combine vector similarity + keyword matching scores

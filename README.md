@@ -30,11 +30,12 @@ RAG Vector는 사내 문서를 안전하게 관리하고 AI 기반 질의응답�
 
 - **🔍 차세대 하이브리드 검색 (Hybrid Search Engine)**
   - **Vector Search**: 의미 기반 검색 (pgvector HNSW)
-  - **Keyword Search**: 한국어 최적화 부분 일치 검색 (ILIKE Pattern Matching)
+  - **Keyword Search**: **Kiwi 형태소 분석기**를 활용한 명사 추출 및 한국어 최적화 부분 일치 검색 (OR-Condition ILIKE)
   - **RRF (Reciprocal Rank Fusion)**: 두 검색 결과를 앙상블하여 최적의 순위 도출
   - **Enhanced Recall**: 후보군을 10배수로 확대(`limit = top_k * 10`)하여 검색 누락 최소화
 
 - **⚡️ 엔터프라이즈급 성능 및 아키텍처**
+  - **High-Performance Ingestion**: **비동기 병렬 처리(Async Batch Processing)**를 통한 초고속 임베딩 생성 (I/O Blocking 제거)
   - **비동기 처리**: Celery + Redis 기반의 Non-blocking 문서 처리
   - **보안**: JWT 인증 및 RBAC 권한 관리
   - **확장성**: 모듈형 모놀리스 구조로 기능 확장 용이
@@ -137,7 +138,7 @@ rag-vector/
 [Step 2] 광범위 후보 검색 (Wide Retrieval)
     - 상위 k*10개 후보 검색 (예: 40개~80개)
     - HNSW 인덱스로 밀리초 단위 검색
-    - ILIKE 패턴 매칭으로 키워드 포함 문서 확보
+    - **Kiwi 형태소 분석**: 질문에서 명사를 추출하여 OR 조건으로 정밀 매칭
     ↓
 [Step 3] 하이브리드 재순위화 (RRF & Reranking)
     - 벡터 유사도 + 키워드 매칭 점수 결합
