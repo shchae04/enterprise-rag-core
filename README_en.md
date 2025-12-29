@@ -104,9 +104,11 @@ rag-vector/
 │   ├── models/            # SQLAlchemy Models (Document, User, etc.)
 │   ├── core/              # Config, Logging, Exceptions, Security, Celery
 │   ├── utils/             # File Parsers & Utilities
-│   └── worker.py          # Celery Async Task Definitions
+│   ├── worker.py          # Celery Async Task Definitions
 │   └── initial_data.py    # Initial Data (Admin) Creation Script
 ├── docker/                # Docker Config (Entrypoint for migration & init)
+├── tests/                 # Tests & Quality Evaluation Scripts
+└── admin_app.py           # Streamlit Admin App
 ```
 
 ### Detailed Documentation
@@ -237,6 +239,9 @@ curl -X POST http://localhost:8000/api/v1/documents/upload \
 curl -X POST http://localhost:8000/api/v1/chat/query \
   -H "Content-Type: application/json" \
   -d '{"query": "Test Question"}'
+
+# Run RAG Quality Evaluation (Prerequisites: ragas, datasets, etc.)
+# PYTHONPATH=. python tests/evaluation/evaluate_rag.py
 ```
 
 ## Environment Configuration
@@ -312,6 +317,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ### ✅ Phase 1: Foundation (Completed)
 - [x] **Core Architecture**: Modular Monolith design & Async processing implementation.
+- [x] **Async Processing**: High-volume document processing via Redis/Celery.
 - [x] **RAG Engine**: Query Expansion & Hybrid Reranking pipeline.
 - [x] **Infrastructure**: Docker Compose container orchestration & CI/CD automation (GitHub Actions).
 - [x] **Documentation**: Enterprise standard technical docs & operations guide.
@@ -327,7 +333,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ### 🔮 Phase 3: Advanced Intelligence
 - [ ] **Frontend Modernization**: Build Enterprise Admin Console based on React (Next.js) replacing Streamlit.
-- [ ] **Scalability**: Large-scale document async distributed processing via Redis/Celery.
 - [ ] **Multi-modal RAG**: Advanced pipeline capable of analyzing images, charts, and graphs.
 
 ## License

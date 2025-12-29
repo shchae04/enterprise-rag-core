@@ -107,6 +107,8 @@ rag-vector/
 │   ├── worker.py          # Celery 비동기 작업 정의
 │   └── initial_data.py    # 초기 데이터 (관리자) 생성 스크립트
 ├── docker/                # Docker 설정 (entrypoint에서 마이그레이션 및 초기화 수행)
+├── tests/                 # 테스트 및 품질 평가 스크립트
+└── admin_app.py           # 관리자용 Streamlit 앱
 ```
 
 ### 상세 문서
@@ -237,6 +239,9 @@ curl -X POST http://localhost:8000/api/v1/documents/upload \
 curl -X POST http://localhost:8000/api/v1/chat/query \
   -H "Content-Type: application/json" \
   -d '{"query": "테스트 질문"}'
+
+# RAG 품질 평가 실행 (사전 요구사항: ragas, datasets 등 설치 필요)
+# PYTHONPATH=. python tests/evaluation/evaluate_rag.py
 ```
 
 ### 데이터베이스 마이그레이션
@@ -343,6 +348,7 @@ docker-compose logs -f openwebui
 
 ### ✅ Phase 1: Foundation (완료)
 - [x] **Core Architecture**: 모듈형 모놀리스(Modular Monolith) 설계 및 비동기(Async) 처리 구현
+- [x] **Async Processing**: Redis/Celery 기반의 대용량 문서 비동기 분산 처리
 - [x] **RAG Engine**: 쿼리 확장(Query Expansion) 및 하이브리드 재순위화(Hybrid Reranking) 파이프라인 구축
 - [x] **Infrastructure**: Docker Compose 기반 컨테이너 오케스트레이션 및 CI/CD 자동화 (GitHub Actions)
 - [x] **Documentation**: 엔터프라이즈 표준 기술 문서 및 운영 가이드 수립
@@ -358,7 +364,6 @@ docker-compose logs -f openwebui
 
 ### 🔮 Phase 3: Advanced Intelligence
 - [ ] **Frontend Modernization**: Streamlit을 대체하는 React(Next.js) 기반 엔터프라이즈 Admin Console 구축
-- [ ] **Scalability**: Redis/Celery 도입을 통한 대용량 문서 비동기 분산 처리
 - [ ] **Multi-modal RAG**: 이미지, 도표, 차트 분석이 가능한 멀티모달 파이프라인 고도화
 
 
