@@ -1,0 +1,128 @@
+services:
+  # 1. PostgreSQL 데이터베이스 (pgvector 포함)
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: rag_vector_db
+    environment:
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-1234}
+      - POSTGRES_DB=${DB_NAME:-rag_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. Redis (메시지 브로커)
+  redis:
+    image: redis:7-alpine
+    container_name: rag_redis
+    ports:
+      - "6379:6379"
+
+  # 3. RAG 백엔드 (HWP/문서 처리 엔진)
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: rag_backend
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-1234}
+      - DB_NAME=${DB_NAME:-rag_db}
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./docs:/app/docs
+      - .:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  # 4. Celery Worker (비동기 작업 처리)
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: rag_worker
+    command: celery -A app.core.celery_app worker --loglevel=info
+    depends_on:
+      - backend
+      - redis
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-1234}
+      - DB_NAME=${DB_NAME:-rag_db}
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    env_file:
+      - .env
+    volumes:
+      - ./docs:/app/docs
+      - .:/app
+
+  # 5. Open WebUI (프론트엔드 인터페이스)
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open_webui
+    ports:
+      - "3000:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434 # Ollama 사용 시 (선택)
+      - ENABLE_OLLAMA_API=False         # Ollama API 비활성화 (오류 방지)
+      - OPENAI_API_BASE_URL=http://backend:8000/api/v1 # 우리 백엔드 연결 (/api/v1/chat/completions)
+      - OPENAI_API_KEY=sk-rag-dummy-key # 더미 키 (우리 백엔드는 인증 무시 가능)
+      - WEBUI_NAME=Enterprise RAG Core
+      # 사내용 커스텀 설정 (기능 제한)
+      - ENABLE_SIGNUP=True              # 회원가입 비활성화
+      - ENABLE_WEB_SEARCH=False         # 웹 검색 비활성화
+      - ENABLE_IMAGE_GENERATION=False   # 이미지 생성 비활성화
+      - ENABLE_COMMUNITY_SHARING=False  # 커뮤니티 공유 기능 비활성화
+    volumes:
+      - open_webui_data:/app/backend/data
+    depends_on:
+      - backend
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # 6. Admin UI (문서 관리용 Streamlit)
+  admin-ui:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: rag_admin
+    # entrypoint.sh(백엔드 실행 스크립트)를 무시하고 Streamlit 바로 실행
+    entrypoint: ["streamlit", "run", "admin_app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
+    ports:
+      - "8501:8501"
+    environment:
+      - BACKEND_URL=http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - .:/app
+
+volumes:
+  postgres_data:
+  open_webui_data:

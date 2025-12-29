@@ -1,0 +1,119 @@
+# ==============================================================================
+# RAG Vector Enterprise - Standard .gitignore
+# ==============================================================================
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- 환경 변수 (Security: 중요) ---
+.env
+.env.*
+!.env.example
+
+# --- IDE & Editors ---
+.idea/
+.vscode/
+.claude/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+.classpath
+.factorypath
+
+# --- OS ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# --- Personal/Temp Files ---
+CLAUDE.md
+check_models.py
+
+# --- 데이터베이스 및 마이그레이션 ---
+*.db
+*.sqlite
+*.sqlite3
+# alembic/versions/ 내의 .py 파일은 버전 관리에 포함되어야 하므로 제외하지 않음
+
+# --- 문서 및 업로드 데이터 (RAG 전용) ---
+# 사용자가 업로드한 문서(PDF, HWP 등)가 저장되는 docs/ 폴더 관리
+docs/*
+# 하지만 프로젝트의 핵심 문서(MD 파일)와 .gitkeep은 추적함
+!docs/*.md
+!docs/.gitkeep
+# 참고: documentation/ 폴더는 시스템 문서이므로 전체 추적함
+
+# --- 로그 및 임시 파일 ---
+*.log
+logs/
+tmp/
+temp/
+.gemini/
+
+# --- 테스트 및 품질 도구 ---
+.pytest_cache/
+.tox/
+.nox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.ruff_cache/
+.mypy_cache/
+
+# --- Node.js / 프론트엔드 (있는 경우) ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.next/
+out/
+
+# --- Docker ---
+.docker/
+# Docker 데이터 볼륨이 로컬에 생성되는 경우
+pgdata/
+
+# --- Jupyter Notebook ---
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+*.ipynb
+
+# ==============================================================================
+# End of .gitignore
+# ==============================================================================

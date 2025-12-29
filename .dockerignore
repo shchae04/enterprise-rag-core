@@ -1,0 +1,49 @@
+# --- Git ---
+.git
+.gitignore
+.gitattributes
+
+# --- IDE & Editors ---
+.idea/
+.vscode/
+.claude/
+*.swp
+*.swo
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- Environment ---
+.env
+.env.*
+!.env.example
+
+# --- Project Specific ---
+docs/
+documentation/
+alembic/versions/__pycache__/
+scripts/*.bat
+
+# --- Docker ---
+# docker/  <-- (주석 처리) entrypoint.sh 사용을 위해 포함해야 함
+# Dockerfile <-- (주석 처리) 
+# docker-compose.yml <-- (주석 처리) 
+.dockerignore
+
+# --- Temp & Logs ---
+*.log
+logs/
+tmp/
+temp/
+/Users/sanghyeok/.gemini/tmp/

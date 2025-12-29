@@ -1,0 +1,82 @@
+name: RAG Vector CI
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    services:
+      # 테스트용 DB 서비스 (pgvector 포함)
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        # DB가 준비될 때까지 대기
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest httpx pytest-asyncio
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Run tests
+      env:
+        DATABASE_URL: postgresql+asyncpg://postgres:password@localhost:5432/test_db
+        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}  # GitHub Repo Settings에서 설정 필요
+        LLM_PROVIDER: gemini
+      run: |
+        # 테스트 파일이 존재할 경우 실행
+        if [ -d "tests" ]; then
+          pytest
+        else
+          echo "No tests found. Skipping..."
+        fi
+
+    - name: Run RAG Evaluation (Optional)
+      if: env.OPENAI_API_KEY != ''
+      env:
+        DATABASE_URL: postgresql+asyncpg://postgres:password@localhost:5432/test_db
+        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        # 평가에 필요한 패키지 설치
+        pip install ragas datasets
+        # 평가 스크립트 실행 (DB 연결 등이 필요하므로 통합 테스트 환경에서 실행 권장)
+        # 현재 CI 환경에서는 DB 데이터가 없으므로 스크립트가 실패할 수 있음.
+        # 따라서 여기서는 echo로 placeholder만 남겨두거나,
+        # 실제로는 seed 데이터(fixtures)를 먼저 넣고 실행해야 함.
+        echo "Skipping actual evaluation in CI demo due to missing seed data."
+        # python tests/evaluation/evaluate_rag.py
