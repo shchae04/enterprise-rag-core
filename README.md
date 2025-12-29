@@ -10,6 +10,8 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
 
+**한국어** | [English](README_en.md)
+
 > **기업용 지식 관리 및 질의응답을 위한 고성능 RAG 엔진의 핵심 코어**
 > Gemini 2.5 Flash Lite 기반의 하이브리드 검색 파이프라인 탑재
 
