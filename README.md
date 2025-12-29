@@ -11,7 +11,7 @@
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
 
 > **기업용 지식 관리 및 질의응답을 위한 고성능 RAG 엔진의 핵심 코어**
-> Gemini 1.5 Flash 기반의 하이브리드 검색 파이프라인 탑재
+> Gemini 2.5 Flash Lite 기반의 하이브리드 검색 파이프라인 탑재
 
 ## 개요
 
@@ -55,7 +55,7 @@ RAG Vector는 사내 문서를 안전하게 관리하고 AI 기반 질의응답�
 | **Search Algo** | RRF + KeywordReranker | 하이브리드 검색 및 재순위화 |
 | **Evaluation** | Ragas + LangSmith | RAG 품질 평가 및 추적 |
 | **Auth** | OAuth2 + JWT | 보안 및 인증 |
-| **AI/LLM** | Google Gemini 1.5 Flash | 임베딩 및 답변 생성 (안정성 강화) |
+| **AI/LLM** | Google Gemini 2.5 Flash Lite | 임베딩 및 답변 생성 (안정성 강화) |
 | **DevOps** | Docker, GitHub Actions | 배포 및 CI/CD |
 
 ## 빠른 시작 (Quick Start)
@@ -128,7 +128,7 @@ rag-vector/
 사용자 질의
     ↓
 [Step 1] 쿼리 확장 (Query Expansion)
-    - 유의어, 관련 용어 추가 (Gemini 1.5 Flash)
+    - 유의어, 관련 용어 추가 (Gemini 2.5 Flash Lite)
     - 어휘 불일치 문제 해결
     ↓
 [Step 2] 광범위 후보 검색 (Wide Retrieval)
@@ -152,7 +152,7 @@ rag-vector/
 
 ### 3. 멀티 LLM 지원 (Multi-Model Support)
 
-본 프로젝트는 기본적으로 **Google Gemini 1.5 Flash**를 사용하지만, 설정을 통해 다른 모델로 손쉽게 전환할 수 있습니다.
+본 프로젝트는 기본적으로 **Google Gemini 2.5 Flash Lite**를 사용하지만, 설정을 통해 다른 모델로 손쉽게 전환할 수 있습니다.
 
 #### 모델 변경 방법
 
@@ -162,7 +162,7 @@ rag-vector/
 **Gemini (기본값)**
 ```bash
 LLM_PROVIDER=gemini
-LLM_MODEL=gemini-2.0-flash  # 또는 gemini-1.5-pro
+LLM_MODEL=gemini-2.5-flash-lite  # 또는 gemini-1.5-pro
 GOOGLE_API_KEY=your_google_key
 ```
 
@@ -259,7 +259,7 @@ alembic downgrade -1
 # LLM 설정
 GOOGLE_API_KEY=your_google_api_key_here
 LLM_PROVIDER=gemini
-LLM_MODEL=gemini-2.0-flash
+LLM_MODEL=gemini-2.5-flash-lite
 
 # 데이터베이스
 DATABASE_URL=postgresql+asyncpg://user:password@postgres:5432/rag_db
@@ -303,7 +303,7 @@ ENABLE_WEB_SEARCH=False
 ### 일반적인 문제
 
 **Q. "Quota exceeded" 오류**
-A. Gemini API 무료 할당량 초과. `LLM_MODEL`을 `gemini-2.0-flash`로 변경하여 해결했습니다.
+A. Gemini API 무료 할당량 초과. `LLM_MODEL`을 `gemini-2.5-flash-lite`로 변경하여 해결했습니다.
 
 **Q. 모델이 보이지 않음**
 A. Open WebUI와 백엔드 연동 확인. `rag-model`만 표시되는 것이 정상입니다.

@@ -73,7 +73,7 @@ streamlit run admin_app.py
 | 변수명 | 설명 | 기본값 |
 | :--- | :--- | :--- |
 | `LLM_PROVIDER` | 사용할 AI 모델 제공자 (gemini, openai 등) | `gemini` |
-| `LLM_MODEL` | 사용할 모델 명칭 | `gemini-2.0-flash` |
+| `LLM_MODEL` | 사용할 모델 명칭 | `gemini-2.5-flash-lite` |
 | `CHUNK_SIZE` | 문서 분할 시 청크 크기 (문자 수) | `1000` |
 | `CHUNK_OVERLAP` | 청크 간 겹침 범위 | `200` |
 | `SEARCH_K` | 최종 반환할 문서 수 | `4` |
