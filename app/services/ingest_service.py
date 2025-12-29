@@ -1,5 +1,6 @@
 import os
 import json
+import asyncio
 from datetime import datetime
 from typing import List, Optional
 from uuid import uuid4
@@ -25,7 +26,6 @@ class IngestService:
         파일을 파싱하고, 임베딩을 생성하여 DB에 저장합니다.
         이미 존재하는 파일명일 경우 덮어씁니다 (기존 데이터 삭제).
         """
-        import asyncio # Import asyncio locally or at top
         
         filename = os.path.basename(file_path)
         logger.info(f"Starting ingestion for file: {filename}")
@@ -111,33 +111,48 @@ class IngestService:
             "category": doc.category,
         }
 
-        for idx, chunk in enumerate(chunks):
-            if len(chunk.strip()) < 10: continue
+        BATCH_SIZE = 10
+        total_chunks = len(chunks)
 
-            try:
-                # Use static method or instantiate VectorService properly if needed, 
-                # but currently VectorService.create_embedding_static is available.
-                # Or better, self.vector_service.create_embedding if we injected it.
-                # Let's use the static one for now as per previous implementation structure.
-                embedding_vector = await VectorService.create_embedding_static(chunk)
-                if not embedding_vector: 
-                    logger.warning(f"Empty embedding generated for chunk {idx} of {doc.filename}")
+        for i in range(0, total_chunks, BATCH_SIZE):
+            batch_chunks = chunks[i:i + BATCH_SIZE]
+            tasks = []
+            
+            for chunk in batch_chunks:
+                if len(chunk.strip()) < 10: 
+                    # Placeholder to maintain index sync if needed, or just skip. 
+                    # If skipping, we just won't have an embedding for this snippet.
+                    tasks.append(asyncio.sleep(0)) 
+                    continue
+                tasks.append(VectorService.create_embedding_static(chunk))
+            
+            # Run batch in parallel
+            embeddings_results = await asyncio.gather(*tasks)
+
+            # Process results
+            for j, embedding_vector in enumerate(embeddings_results):
+                # Skip if it was a skipped chunk (asyncio.sleep result is None usually or 0, depending on sleep)
+                if embedding_vector is None or isinstance(embedding_vector, int): 
+                    continue
+                    
+                if not embedding_vector:
+                    logger.warning(f"Empty embedding generated for chunk {i+j} of {doc.filename}")
                     continue
 
+                chunk_idx = i + j
+                chunk_content = batch_chunks[j]
+                
                 chunk_metadata = base_metadata.copy()
-                chunk_metadata["chunk_index"] = idx
+                chunk_metadata["chunk_index"] = chunk_idx
 
                 embedding_entry = Embedding(
                     document_id=doc.id,
-                    chunk_index=idx,
-                    content=chunk,
+                    chunk_index=chunk_idx,
+                    content=chunk_content,
                     embedding=embedding_vector,
                     metadata_info=chunk_metadata 
                 )
                 self.db.add(embedding_entry)
-            except Exception as e:
-                logger.error(f"Error processing chunk {idx}: {e}")
-                raise e # Re-raise to trigger rollback in the caller
 
     async def _update_tsvectors(self, document_id):
         """

@@ -1,11 +1,13 @@
 import google.generativeai as genai
+import asyncio
 from typing import List, Optional, Dict
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import text, select
+from sqlalchemy import text, select, or_
 
 from app.core.config import settings
 from app.core.logging import logger
 from app.models.embedding import Embedding
+from app.utils.nlp import extract_nouns
 
 # Configure Gemini
 if settings.GOOGLE_API_KEY:
@@ -20,11 +22,11 @@ class VectorService:
 
     @staticmethod
     async def create_embedding(text: str) -> List[float]:
-        """Gemini text-embedding-004를 사용하여 텍스트 임베딩 생성 (Async wrapper)"""
+        """Gemini text-embedding-004를 사용하여 텍스트 임베딩 생성 (Async wrapper with Thread)"""
         try:
-            # Note: genai library is currently synchronous for embeddings, 
-            # might need to run in thread pool for true async if blocking
-            result = genai.embed_content(
+            # genai.embed_content는 동기 함수이므로, 이벤트 루프 차단을 막기 위해 스레드에서 실행
+            result = await asyncio.to_thread(
+                genai.embed_content,
                 model=EMBEDDING_MODEL,
                 content=text,
                 task_type="retrieval_document"
@@ -103,14 +105,26 @@ class VectorService:
         return result.scalars().all()
 
     async def _search_keyword(self, query: str, limit: int) -> List[Embedding]:
-        # Fallback to ILIKE for reliable partial matching in Korean without Nori tokenizer
-        # This ensures "보안" matches "보안관리규정"
-        search_pattern = f"%{query}%"
-        sql = select(Embedding).where(
-            Embedding.content.ilike(search_pattern)
-        ).limit(limit)
+        # 1. 형태소 분석을 통해 명사 추출
+        nouns = extract_nouns(query)
         
-        result = await self.db.execute(sql)
+        # 2. 명사가 추출된 경우 OR 조건으로 검색 (Recall 향상)
+        if nouns:
+            conditions = [Embedding.content.ilike(f"%{noun}%") for noun in nouns]
+            # 원본 쿼리도 포함 (정확도 보장)
+            conditions.append(Embedding.content.ilike(f"%{query}%"))
+            
+            stmt = select(Embedding).where(
+                or_(*conditions)
+            ).limit(limit)
+        else:
+            # 명사가 없으면 기존 단순 포함 검색 (Fallback)
+            search_pattern = f"%{query}%"
+            stmt = select(Embedding).where(
+                Embedding.content.ilike(search_pattern)
+            ).limit(limit)
+        
+        result = await self.db.execute(stmt)
         return result.scalars().all()
 
     def _apply_rrf(self, vector_results: List[Embedding], keyword_results: List[Embedding], k: int = 60) -> List[tuple]:

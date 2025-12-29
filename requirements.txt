@@ -33,3 +33,6 @@ greenlet==3.0.3
 ragas
 datasets
 langchain-openai
+
+# Korean NLP
+kiwipiepy
