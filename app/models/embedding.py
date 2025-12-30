@@ -1,5 +1,5 @@
 import uuid
-from typing import Optional, Any
+from typing import Optional, Any, TYPE_CHECKING
 from sqlalchemy import String, Integer, Text, ForeignKey, Index, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID, JSONB, TSVECTOR
@@ -7,6 +7,9 @@ from pgvector.sqlalchemy import Vector
 from sqlalchemy.types import TypeDecorator
 
 from app.models.base import Base
+
+if TYPE_CHECKING:
+    from app.models.document import Document
 
 class TSVector(TypeDecorator):
     impl = TSVECTOR

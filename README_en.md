@@ -209,6 +209,9 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 # 2. Install dependencies
 pip install -r requirements.txt
 
+# 2-1. Install development dependencies (optional - for testing, evaluation, etc.)
+pip install -r requirements-dev.txt
+
 # 3. Configure environment variables
 cp .env.example .env
 # Edit .env file
