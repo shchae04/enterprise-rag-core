@@ -209,6 +209,9 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 # 2. 의존성 설치
 pip install -r requirements.txt
 
+# 2-1. 개발 의존성 설치 (선택 사항 - 테스트, 평가 등)
+pip install -r requirements-dev.txt
+
 # 3. 환경 변수 설정
 cp .env.example .env
 # .env 파일 편집
