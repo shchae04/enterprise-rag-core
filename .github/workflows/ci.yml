@@ -38,12 +38,25 @@ jobs:
       with:
         python-version: "3.11"
         cache: 'pip'
+        cache-dependency-path: |
+          requirements.txt
+          requirements-dev.txt
+
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt', 'requirements-dev.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install flake8 pytest httpx pytest-asyncio
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        python -m pip install --upgrade pip wheel setuptools
+        # Install only core dependencies for CI (exclude heavy evaluation packages)
+        pip install -r requirements.txt
+        pip install pytest==8.3.0 pytest-asyncio==0.23.0 httpx==0.27.0 flake8==7.1.0
+      timeout-minutes: 15
 
     - name: Lint with flake8
       run: |
@@ -66,17 +79,15 @@ jobs:
         fi
 
     - name: Run RAG Evaluation (Optional)
-      if: env.OPENAI_API_KEY != ''
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       env:
         DATABASE_URL: postgresql+asyncpg://postgres:password@localhost:5432/test_db
         GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       run: |
-        # 평가에 필요한 패키지 설치
-        pip install ragas datasets
-        # 평가 스크립트 실행 (DB 연결 등이 필요하므로 통합 테스트 환경에서 실행 권장)
-        # 현재 CI 환경에서는 DB 데이터가 없으므로 스크립트가 실패할 수 있음.
-        # 따라서 여기서는 echo로 placeholder만 남겨두거나,
-        # 실제로는 seed 데이터(fixtures)를 먼저 넣고 실행해야 함.
-        echo "Skipping actual evaluation in CI demo due to missing seed data."
+        # 평가는 main 브랜치에 푸시될 때만 실행 (Optional)
+        # 무거운 패키지(ragas, datasets)는 별도로 설치
+        echo "Skipping RAG evaluation in CI to reduce build time."
+        echo "Run 'pip install -r requirements-dev.txt' and 'python tests/evaluation/evaluate_rag.py' locally for evaluation."
+        # pip install ragas==0.1.0 datasets==2.20.0 langchain-openai==0.2.0
         # python tests/evaluation/evaluate_rag.py
