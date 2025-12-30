@@ -1,10 +1,15 @@
 name: RAG Vector CI
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main", "develop" ]
   pull_request:
     branches: [ "main", "develop" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -31,10 +36,10 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python 3.11
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "3.11"
         cache: 'pip'
@@ -42,17 +47,10 @@ jobs:
           requirements.txt
           requirements-dev.txt
 
-    - name: Cache pip packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt', 'requirements-dev.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip wheel setuptools
+        pip config set global.disable-pip-version-check true
         # Install only core dependencies for CI (exclude heavy evaluation packages)
         pip install -r requirements.txt
         pip install pytest==8.3.0 pytest-asyncio==0.21.2 httpx==0.27.0 flake8==7.1.0
@@ -79,7 +77,8 @@ jobs:
       run: |
         set -euo pipefail
         # 빠른 유닛/스모크는 항상 실행
-        pytest -m "not integration"
+        pytest -m "not integration" -q --maxfail=1
+      timeout-minutes: 10
 
     - name: Run integration tests (main only)
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -105,7 +104,8 @@ jobs:
         if [ "$code" -ne 0 ]; then
           exit "$code"
         fi
-        pytest -m "integration"
+        pytest -m "integration" -q --maxfail=1
+      timeout-minutes: 15
 
     - name: Run RAG Evaluation (Optional)
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
