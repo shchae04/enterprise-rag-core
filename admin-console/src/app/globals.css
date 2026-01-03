@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+:root {
+  --ink-100: #f6f1e8;
+  --ink-200: #e9e2d6;
+  --ink-600: #6b6257;
+  --ink-900: #1f1a14;
+  --sun-400: #f2b451;
+  --sun-600: #d88924;
+  --sage-400: #4fa691;
+  --sage-700: #2b6f62;
+  --danger-500: #d74b3f;
+  --card: rgba(255, 255, 255, 0.75);
+  --shadow: 0 28px 80px -60px rgba(31, 26, 20, 0.5);
+}
+
+@theme inline {
+  --font-sans: var(--font-sora);
+  --font-mono: var(--font-jetbrains-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  color: var(--ink-900);
+  background: radial-gradient(circle at top, #fff7e8 0%, #f8f0e4 45%, #efe6d7 100%);
+}
+
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.app-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(135deg, rgba(31, 26, 20, 0.06) 1px, transparent 1px),
+    linear-gradient(45deg, rgba(31, 26, 20, 0.04) 1px, transparent 1px);
+  background-size: 42px 42px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.fade-up {
+  animation: fadeUp 0.6s ease both;
+}
+
+.floaty {
+  animation: floaty 6s ease-in-out infinite;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}

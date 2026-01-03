@@ -1,7 +1,8 @@
 import asyncio
 import logging
-from sqlalchemy import select
-from app.core.database import AsyncSessionLocal
+from sqlalchemy import select, text
+from app.core.database import AsyncSessionLocal, engine
+from app.models import Base
 from app.models.user import User
 from app.core.security import get_password_hash
 
@@ -12,6 +13,14 @@ logger = logging.getLogger(__name__)
 async def init_db() -> None:
     async with AsyncSessionLocal() as db:
         try:
+            # Ensure tables exist when migrations are not present
+            async with engine.begin() as conn:
+                try:
+                    await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+                except Exception as e:
+                    logger.warning(f"⚠️ pgvector extension check failed (continuing): {e}")
+                await conn.run_sync(Base.metadata.create_all)
+
             # 1. 관리자 계정이 이미 있는지 확인
             result = await db.execute(select(User).where(User.email == "admin@example.com"))
             user = result.scalars().first()
