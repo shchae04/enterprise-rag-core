@@ -1,5 +1,4 @@
 from typing import List
-from kiwipiepy import Kiwi
 import threading
 
 class KoreanNLP:
@@ -12,6 +11,8 @@ class KoreanNLP:
             with cls._lock:
                 if not cls._instance:
                     cls._instance = super(KoreanNLP, cls).__new__(cls)
+                    # Lazy import to avoid heavy startup cost
+                    from kiwipiepy import Kiwi
                     cls._instance._kiwi = Kiwi()
         return cls._instance
 
@@ -30,8 +31,8 @@ class KoreanNLP:
                 keywords.append(token.form)
         return list(set(keywords))  # 중복 제거
 
-# 전역 인스턴스 생성
-nlp_processor = KoreanNLP()
-
 def extract_nouns(text: str) -> List[str]:
-    return nlp_processor.extract_keywords(text)
+    # Lazy-init to avoid heavy model load during app startup
+    if not hasattr(extract_nouns, "_nlp"):
+        extract_nouns._nlp = KoreanNLP()  # type: ignore[attr-defined]
+    return extract_nouns._nlp.extract_keywords(text)  # type: ignore[attr-defined]
