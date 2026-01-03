@@ -22,9 +22,10 @@ export async function GET(
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
+    console.error("Backend proxy error:", error);
     return NextResponse.json(
-      { error: "Backend request failed" },
-      { status: 500 }
+      { error: "Backend request failed", detail: error instanceof Error ? error.message : "Unknown error" },
+      { status: 502 }
     );
   }
 }
@@ -47,14 +48,16 @@ export async function POST(
 
   try {
     let body;
+    let fetchHeaders = { ...headers };
+
     if (contentType?.includes("multipart/form-data")) {
-      // For file uploads, pass the FormData directly
+      // For file uploads, don't set Content-Type (browser will set boundary)
       body = await request.formData();
     } else if (contentType?.includes("application/json")) {
-      headers["Content-Type"] = "application/json";
+      fetchHeaders["Content-Type"] = "application/json";
       body = JSON.stringify(await request.json());
     } else if (contentType?.includes("application/x-www-form-urlencoded")) {
-      headers["Content-Type"] = "application/x-www-form-urlencoded";
+      fetchHeaders["Content-Type"] = "application/x-www-form-urlencoded";
       body = await request.text();
     } else {
       body = await request.text();
@@ -62,16 +65,17 @@ export async function POST(
 
     const response = await fetch(url, {
       method: "POST",
-      headers,
+      headers: fetchHeaders,
       body,
     });
 
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
+    console.error("Backend proxy error:", error);
     return NextResponse.json(
-      { error: "Backend request failed" },
-      { status: 500 }
+      { error: "Backend request failed", detail: error instanceof Error ? error.message : "Unknown error" },
+      { status: 502 }
     );
   }
 }
@@ -99,9 +103,10 @@ export async function DELETE(
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
+    console.error("Backend proxy error:", error);
     return NextResponse.json(
-      { error: "Backend request failed" },
-      { status: 500 }
+      { error: "Backend request failed", detail: error instanceof Error ? error.message : "Unknown error" },
+      { status: 502 }
     );
   }
 }
